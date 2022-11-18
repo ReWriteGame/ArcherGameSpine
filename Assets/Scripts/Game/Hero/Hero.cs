@@ -1,5 +1,5 @@
-using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 [SelectionBase]
 public class Hero : MonoBehaviour
@@ -7,10 +7,10 @@ public class Hero : MonoBehaviour
     [SerializeField] private Move move;
     private bool isDied = false;
     
-    public Action OnAttackBow;
-    public Action OnAttackSword;
-    public Action OnAttackStaff;
-    public Action OnDied;
+    public UnityEvent OnDied;
+    public UnityEvent OnAttackBow;
+    public UnityEvent OnAttackSword;
+    public UnityEvent OnAttackStaff;
 
 
     public Move Move => move;

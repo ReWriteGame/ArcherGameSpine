@@ -1,18 +1,22 @@
-using System;
 using Spine.Unity;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
-[RequireComponent(typeof(SkeletonAnimation))]
+[RequireComponent(typeof(SkeletonMecanim),typeof(Animator))]
 public class HeroAnimationController : MonoBehaviour
 {
     [SerializeField] private Hero hero;
-    private SkeletonAnimation skeletonAnimation;
+    private Animator animator;
+
+    private const string RUN = "Run";
+    private const string JUMP = "Jump";
+    private const string DIED = "Died";
+    private const string ATTACK_SWORD = "AttackSword";
+    private const string ATTACK_BOW = "AttackBow";
+    private const string ATTACK_STAFF = "AttackStaff";
     
     private void Start()
     {
-        skeletonAnimation = GetComponent<SkeletonAnimation>();
-        skeletonAnimation.AnimationName = "Idle_01";
+        animator = GetComponent<Animator>();
     }
 
     private void OnEnable()
@@ -21,79 +25,67 @@ public class HeroAnimationController : MonoBehaviour
         hero.Move.OnMoveRight += MoveRight;
         hero.Move.OnIdle += Idle;
         hero.Move.OnJump += Jump;
-        hero.OnDied += Died;
-        //hero.Move.OnFall += Fall;
-
-        hero.OnAttackSword += AttackSword;
-        hero.OnAttackStaff += AttackStaff;
-        hero.OnAttackBow += AttackBow;
+        hero.OnDied.AddListener(Died);
+        
+        hero.OnAttackSword.AddListener(AttackSword);
+        hero.OnAttackStaff.AddListener(AttackStaff);
+        hero.OnAttackBow.AddListener(AttackBow);
     }
 
     private void OnDisable()
     {
+        hero.Move.OnMoveLeft -= MoveLeft;
+        hero.Move.OnMoveRight -= MoveRight;
+        hero.Move.OnIdle -= Idle;
+        hero.Move.OnJump -= Jump;
+        hero.OnDied.RemoveListener(Died);
         
+        hero.OnAttackSword.RemoveListener(AttackSword);
+        hero.OnAttackStaff.RemoveListener(AttackStaff);
+        hero.OnAttackBow.RemoveListener(AttackBow);
     }
 
     private void MoveLeft()
     {
-        skeletonAnimation.loop = true;
-        skeletonAnimation.AnimationName = "Running";
-        skeletonAnimation.gameObject.transform.rotation = Quaternion.Euler(new Vector3(0,180,0));
+        animator.SetBool(RUN, true);
+        animator.gameObject.transform.rotation = Quaternion.Euler(new Vector3(0,180,0));
     }
     
     private void MoveRight()
     {
-        skeletonAnimation.loop = true;
-        skeletonAnimation.AnimationName = "Running";
-        skeletonAnimation.gameObject.transform.rotation = Quaternion.Euler(Vector3.zero);
+        animator.SetBool(RUN, true);
+        animator.gameObject.transform.rotation = Quaternion.Euler(Vector3.zero);
     }
     
     private void Jump()
     {
-        skeletonAnimation.loop = false;
-        skeletonAnimation.AnimationName = "Jump_Start";
+        animator.SetTrigger(JUMP);
     }
+    
 
-  
-
-    private void Idle()
+    public void Idle()
     {
-        skeletonAnimation.loop = true;
-
-        skeletonAnimation.AnimationName = "Idle_01";
-        if(Random.Range(0,4) == 0) skeletonAnimation.AnimationName = "Idle_02_blink";
+        animator.SetBool(RUN, false);
     }
     
     private void Died()
     {
-        skeletonAnimation.loop = false;
-        skeletonAnimation.AnimationName = "Dying";
+        animator.SetBool(DIED, true);
     }
     
-    private void Fall()
-    {
-        skeletonAnimation.loop = true;
-        skeletonAnimation.AnimationName = "Jump_Loop";
-    }
     
     private void AttackBow()
     {
-        if(hero.IsDied)return;
-        skeletonAnimation.loop = true;
-        skeletonAnimation.AnimationName = "Attack_Bow";
+        animator.SetTrigger(ATTACK_BOW);
     }
     
     private void AttackStaff()
     {
-        if(hero.IsDied)return;
-        skeletonAnimation.loop = true;
-        skeletonAnimation.AnimationName = "Attack_Stuff";
+        animator.SetTrigger(ATTACK_STAFF);
     }
     
     private void AttackSword()
     {
-        if(hero.IsDied)return;
-        skeletonAnimation.loop = true;
-        skeletonAnimation.AnimationName = "Attack_Sword";
+        animator.SetTrigger(ATTACK_SWORD);
     }
 }
